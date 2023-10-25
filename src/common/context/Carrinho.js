@@ -7,6 +7,7 @@ CarrinhoContext.displayName = "CarrinhoContext"
 export const CarrinhoProvider = ({children}) => {
     const [carrinho, setCarrinho] = useState([])
     const [carrinhoQtd, setCarrinhoQtd] = useState(0)
+
     return (
         <CarrinhoContext.Provider value={{carrinho, setCarrinho, carrinhoQtd, setCarrinhoQtd}}>
             {children}

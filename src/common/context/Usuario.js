@@ -9,7 +9,7 @@ UsuarioContext.displayName = "UsuarioContext" //display name is how the context 
 //here we define the states we wish to be controlled/shared through context inside a component
 export const UsuarioProvider = ({children}) => {
     const [nome, setNome] = useState('')
-    const [saldo, setSaldo] = useState(0)
+    const [saldo, setSaldo] = useState(0.00)
     return (
         //Context.Provider is the channel to share the states, added in the value attr.
         //Any component encased by UsuarioProvider will be added in the {children} call and

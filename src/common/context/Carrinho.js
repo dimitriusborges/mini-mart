@@ -1,5 +1,7 @@
 import {createContext, useContext, useEffect} from 'react'
 import {useState} from "react";
+import {PagamentoContext} from "./Pagamento";
+import {UsuarioContext} from "./Usuario";
 
 export const CarrinhoContext = createContext();
 CarrinhoContext.displayName = "CarrinhoContext"
@@ -7,9 +9,12 @@ CarrinhoContext.displayName = "CarrinhoContext"
 export const CarrinhoProvider = ({children}) => {
     const [carrinho, setCarrinho] = useState([])
     const [carrinhoQtd, setCarrinhoQtd] = useState(0)
+    const [valorTotal, setValorTotal] = useState(0)
 
     return (
-        <CarrinhoContext.Provider value={{carrinho, setCarrinho, carrinhoQtd, setCarrinhoQtd}}>
+        <CarrinhoContext.Provider value={{carrinho, setCarrinho,
+            carrinhoQtd, setCarrinhoQtd,
+            valorTotal, setValorTotal}}>
             {children}
         </CarrinhoContext.Provider>
     )
@@ -20,7 +25,9 @@ export const CarrinhoProvider = ({children}) => {
 // The component will be able to use the context and its behavior without directly importing
 // useContext
 export const useCarrinhoContext = () => {
-    const{carrinho, setCarrinho, carrinhoQtd, setCarrinhoQtd} = useContext(CarrinhoContext)
+    const{carrinho, setCarrinho, carrinhoQtd, setCarrinhoQtd, valorTotal, setValorTotal} = useContext(CarrinhoContext)
+    const{formaPagamento} = useContext(PagamentoContext)
+    const {setSaldo} = useContext(UsuarioContext)
 
     function addProduto(novoProduto){
 
@@ -62,13 +69,24 @@ export const useCarrinhoContext = () => {
         }))
     }
 
+    function efetuarCompra(){
+        setCarrinho([])
+        setSaldo(saldoAtual => saldoAtual - valorTotal)
+    }
+
     useEffect(() => {
-        const novaQtd = carrinho.reduce((contador, produto) => contador + produto.quantidade, 0);
+        const {novaQtd, novoTotal} = carrinho.reduce((contador, produto) =>
+                ({
+                    novaQtd: contador.novaQtd + produto.quantidade,
+                    novoTotal: contador.novoTotal + produto.valor * produto.quantidade
+                })
+            , {novaQtd:0, novoTotal:0});
         setCarrinhoQtd(novaQtd)
-    }, [carrinho, setCarrinhoQtd])
+        setValorTotal(novoTotal * formaPagamento.juros)
+    }, [carrinho, setCarrinhoQtd, setValorTotal, formaPagamento])
 
     return {
-        carrinho, setCarrinho, addProduto, removeProduto, carrinhoQtd
+        carrinho, setCarrinho, addProduto, removeProduto, carrinhoQtd, valorTotal, efetuarCompra
     }
 
 

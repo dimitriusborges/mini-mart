@@ -1,17 +1,20 @@
 import { Button, Snackbar, InputLabel,Select, MenuItem} from '@material-ui/core';
 import MuiAlert from '@material-ui/lab/Alert';
-import { useState } from 'react';
+import {useContext, useMemo, useState} from 'react';
 import { Container, Voltar, TotalContainer, PagamentoContainer} from './styles';
 import {useCarrinhoContext} from "../../common/context/Carrinho";
 import Produto from "../../components/Produto";
 import {useHistory} from "react-router-dom";
 import {usePagamentoContext} from "../../common/context/Pagamento";
+import {UsuarioContext} from "../../common/context/Usuario";
 
 function Carrinho() {
     const [openSnackbar, setOpenSnackbar] = useState(false);
-    const {carrinho} = useCarrinhoContext()
+    const {carrinho, valorTotal, efetuarCompra} = useCarrinhoContext()
+    const {saldo = 0} = useContext(UsuarioContext)
     const history = useHistory()
     const {tiposPagamento, formaPagamento, mudarFormaPagamento} = usePagamentoContext()
+    const total = useMemo(() => saldo - valorTotal, [saldo, valorTotal])
 
     return (
     <Container>
@@ -42,21 +45,23 @@ function Carrinho() {
         </PagamentoContainer>
         <TotalContainer>
             <div>
-                <h2>Total no Carrinho: </h2>
-                <span>R$ </span>
+                <h2>Total no Carrinho:</h2>
+                <span>R${valorTotal.toFixed(2)} </span>
             </div>
             <div>
                 <h2> Saldo: </h2>
-                <span> R$ </span>
+                <span> R${Number(saldo).toFixed(2)} </span>
             </div>
             <div>
                 <h2> Saldo Total: </h2>
-                <span> R$ </span>
+                <span> R${total.toFixed(2)}</span>
             </div>
         </TotalContainer>
         <Button
+            disabled={total < 0 || carrinho.length === 0}
             onClick={() => {
-              setOpenSnackbar(true);
+                efetuarCompra();
+                setOpenSnackbar(true);
             }}
             color="primary"
             variant="contained"
